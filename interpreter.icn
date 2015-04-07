@@ -1,0 +1,125 @@
+#
+global vars, expressionQueue
+#TODO: Add a record for type checking
+procedure main(args)
+	vars := table("NOOB")
+	write(parseExpression("SAEM 5 AN 5\n"))
+end
+
+procedure parseLine(line)
+	line ?
+	{
+		if ="I HAS A"
+			then addVar(line) & return	
+	    if ="O RLY"
+			then ifStmt(line) & return	
+	}
+end
+
+procedure ifStmt(line)
+{
+	line ?
+	{
+		move(match("O RLY"))
+	
+		boolExpr := tab(upto('?'))
+		result := parseExpression(boolExpr || "\n")
+
+
+	}
+}
+end
+
+procedure parseExpression(expr)
+	whitespace := ' \t\n'
+	expressionQueue := []
+	expr ?
+	{
+		every loc := upto(whitespace) do
+		{
+			term := fullTrim(tab(loc), whitespace)
+			if term ~== "OF" & term ~== "AN" 
+				then 
+				{
+					put(expressionQueue, term)
+				}
+		}
+	}
+	return execExpression()
+end
+
+procedure execExpression()
+	if *expressionQueue = 0
+		then write("empty") & return
+
+	node := pop(expressionQueue)
+	write("Popped: " || node)
+	if node[1] ? any(&digits)
+		then return node
+	
+	if node == "SUM"
+		then return execExpression() + execExpression()
+	if node == "DIF"
+		then return execExpression() - execExpression()
+	if node == "PRODUKT"
+		then return execExpression() * execExpression()
+	if node == "QUOSHUNT"
+		then return execExpression() / execExpression()
+	if node == "MOD"
+		then return execExpression() % execExpression()
+	if node == "BIGGR"
+		then
+		{
+			first := execExpression()
+			second := execExpression()
+			if first > second
+				then return first
+				else return second
+		}
+	if node == "SMALLR"
+		then
+		{
+			first := execExpression()
+			second := execExpression()
+			if first > second
+				then return second
+				else return first
+		}
+	if node == "SAEM"
+		then
+		{
+			if execExpression() = execExpression()
+				then return 1
+				else return 0
+		}
+	if node == "DIFFRINT"
+		then
+		{
+			if execExpression() = execExpression()
+				then return 0
+				else return 1
+		}
+
+	return vars[node]
+end
+
+procedure addVar(line)
+	whitespace := ' \t\n' 
+	line ?
+	{
+		move(match("I HAS A"))
+		varName := tab(upto(whitespace)) | tab(0)
+		vars[varName] := "NOOB" #TODO: implement types
+		write("varName: " || varName)	
+		if findLoc := find("ITZ")
+			then 
+			{
+				move(5)
+				vars[varName] := line[&pos:*line+1] 
+			}
+	}
+end
+
+procedure fullTrim(str, chars)
+	return reverse(trim(reverse(trim(str, chars)), chars))
+end
