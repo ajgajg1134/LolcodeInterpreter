@@ -3,7 +3,7 @@ global vars, expressionQueue
 #TODO: Add a record for type checking
 procedure main(args)
 	vars := table("NOOB")
-	write(parseLine("O RLY 1? YA RLY cool O RLY 0? YA RLY things NO WAI stuff OIC OIC\n"))
+	write(parseLine("O RLY 0? YA RLY stuff NO WAI O RLY 1? YA RLY things OIC OIC\n"))
 end
 
 procedure executeBlock(block)
@@ -38,48 +38,56 @@ procedure ifStmt(line)
 		every wordLoc := upto(' \t\n') do
 		{
 			word := fullTrim(tab(wordLoc), ' \t\n')
+			#write("word: " || word)
 			if word == "O"
 				then ifCounter := ifCounter + 1
 			if word == "NO" & ifCounter = 0
 				then 
-				{
-					winBlock := line[startBlockLocation:(&pos-6)]
+				{	
+					winBlock := line[startBlockLocation:(&pos-2)]
+					move(4) #move past " WAI"
 					elseBlockLoc := &pos
 				}
 			if word == "OIC"
 				then
 				{
 					if ifCounter = 0
-						then winBlock := line[startBlockLocation:(&pos-3)]
+						then 
+						{
+							if \elseBlockLoc
+								then
+								{
+									elseBlock := line[elseBlockLoc:&pos-3]
+								}
+								else
+								{
+									winBlock := line[startBlockLocation:(&pos-3)]
+								}
+							break
+						}
 					if ifCounter > 0
 						then ifCounter := ifCounter - 1
 				}
 		}
 
-		write("Win: " || winBlock)
+		if ifCounter ~= 0
+			then 
+			{
+				write("ERROR O RLY? MISSING MATCHING OIC:\n" || line)
+				return
+			}
+		write("win: " || winBlock)
+		write("fail: " || elseBlock)	
 		
 		if result = 1
 			then
 			{
-				#TODO: Parse up string looking for ifs to allow nesting
-				
-
-				#if elseLoc := find("NO WAI")
-				#	then codeBlock := tab(elseLoc)
-				#	else codeBlock := tab(find("OIC"))
-				#executeBlock(fullTrim(codeBlock, ' \t'))
+				executeBlock(winBlock)
 			}
 			else
 			{
-				#if elseLoc := find("NO WAI")
-					#then
-					#{
-					#	tab(elseLoc)
-					#	move(*"NO WAI")
-					#	codeBlock := tab(find("OIC"))
-					#}
-														
-
+				if \elseBlock
+					then executeBlock(elseBlock)
 			}
 	}
 end
