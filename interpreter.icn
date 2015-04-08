@@ -3,7 +3,7 @@ global vars, expressionQueue
 #TODO: Add a record for type checking
 procedure main(args)
 	vars := table("NOOB")
-	write(parseLine("O RLY 0? YA RLY stuff NO WAI O RLY 1? YA RLY things OIC OIC\n"))
+	write(parseExpression("SUM OF A AN 2\n"))
 end
 
 procedure executeBlock(block)
@@ -15,7 +15,6 @@ procedure parseLine(line)
 	{
 		if ="I HAS A"
 			then addVar(line) & return	
-		p
 	    if ="O RLY"
 			then ifStmt(line) & return	
 	}
@@ -161,8 +160,11 @@ procedure execExpression()
 				then return 0
 				else return 1
 		}
-
-	return vars[node]
+	# Check if variable is defined / exists
+	value := vars[node]
+	if /value
+		then return value
+		else write("Error: " || node || " is undefined")
 end
 
 procedure addVar(line)
