@@ -3,7 +3,13 @@ global vars, expressionQueue
 #TODO: Add a record for type checking
 procedure main(args)
 	vars := table("NOOB")
-	parseLine("VISIBLE \"hello\n\"\n")
+	filename := args[1]
+	if / filename
+		then write("Usage: interpreter file-name") & return
+	file := open(filename)
+	text := ""
+	while text := text || read(file) || "\n"
+	executeBlock(text)
 end
 
 #Executes a block of code
@@ -12,42 +18,52 @@ procedure executeBlock(block)
 	{
 		every loc := upto('\n') do
 		{
+			if loc < &pos
+				then next
 			line := fullTrim(tab(loc), ' \t\n')
-			write("->" || line)
+			#write("=>" || line)
 			if match("O RLY", line)
 				then
 				{
 					searchSpace := line || block[&pos:*block]
-					startBlockLocation := &pos
+					startBlockLocation := &pos - *line
 					ifCounter := 0
-					searchSpace ? 
+					#searchSpace ? 
+					#{
+					#move(5) #move past O RLY
+					every wordLoc := upto(' \t\n') do
 					{
-						move(5) #move past O RLY
-						every wordLoc := upto(' \t\n') do
-						{
-							word := fullTrim(tab(wordLoc), ' \t\n')
-							write("word: " || word)
-							if word == "O"
-								then ifCounter := ifCounter + 1
-							if word == "OIC"
+						word := fullTrim(tab(wordLoc), ' \t\n')
+						#write("word: " || word)
+						if word == "O"
+							then ifCounter := ifCounter + 1
+						if word == "OIC"
 							then
 							{
-
-								if ifCounter = 0
-									then 
-									{
-										write("block: " || searchSpace[0:&pos])
-										break
-									}
-								if ifCounter > 0
-									then ifCounter := ifCounter - 1
-							}
+							if ifCounter = 0
+								then 
+								{
+									ifStmt(block[startBlockLocation:&pos]||"\n")
+									moveUpto := &pos
+									#write("pos: " || moveUpto)
+									break
+								}
+							if ifCounter > 0
+								then ifCounter := ifCounter - 1
 						}
 					}
-					#reset pos
-					write("Searching in: " || searchSpace)
+					&pos := moveUpto
+					#}
+					#tab(moveUpto - *line)	
+					#write("line: " || line)
+					#write("leftover:" || block[&pos:*block])
+					#write("moved past: " || tab(moveUpto - *line))
 				}
-				else parseLine(line)
+				else 
+				{
+					#write("parsing: " || line)
+					parseLine(line)
+				}
 		}
 	}
 end
@@ -62,6 +78,8 @@ procedure parseLine(line)
 			then ifStmt(line) & return
 		if ="VISIBLE"
 			then visibleStmt(line) & return
+	
+	
 	}
 end
 
@@ -78,6 +96,7 @@ procedure visibleStmt(line)
 end
 
 procedure ifStmt(line)
+	#write("->"||line)
 	line ?
 	{
 		move(match("O RLY"))
@@ -132,18 +151,23 @@ procedure ifStmt(line)
 				write("ERROR O RLY? MISSING MATCHING OIC:\n" || line)
 				return
 			}
-		write("win: " || winBlock)
-		write("fail: " || elseBlock)	
+		#write("win: " || winBlock)
+		#write("fail: " || elseBlock)	
 		
 		if result = 1
 			then
 			{
+				#write("~>" || winBlock)
 				executeBlock(winBlock)
 			}
 			else
 			{
 				if \elseBlock
-					then executeBlock(elseBlock)
+					then 
+					{
+						executeBlock(elseBlock)
+						#write("!>" || elseBlock)
+					}
 			}
 	}
 end
@@ -230,7 +254,6 @@ procedure addVar(line)
 		move(match("I HAS A"))
 		varName := tab(upto(whitespace)) | tab(0)
 		vars[varName] := "NOOB" #TODO: implement types
-		write("varName: " || varName)	
 		if findLoc := find("ITZ")
 			then 
 			{
