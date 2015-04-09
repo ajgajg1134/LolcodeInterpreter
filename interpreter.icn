@@ -3,20 +3,77 @@ global vars, expressionQueue
 #TODO: Add a record for type checking
 procedure main(args)
 	vars := table("NOOB")
-	write(parseExpression("SUM OF A AN 2\n"))
+	parseLine("VISIBLE \"hello\n\"\n")
 end
 
+#Executes a block of code
 procedure executeBlock(block)
-	write("Execing: " || block)
+	block ?
+	{
+		every loc := upto('\n') do
+		{
+			line := fullTrim(tab(loc), ' \t\n')
+			write("->" || line)
+			if match("O RLY", line)
+				then
+				{
+					searchSpace := line || block[&pos:*block]
+					startBlockLocation := &pos
+					ifCounter := 0
+					searchSpace ? 
+					{
+						move(5) #move past O RLY
+						every wordLoc := upto(' \t\n') do
+						{
+							word := fullTrim(tab(wordLoc), ' \t\n')
+							write("word: " || word)
+							if word == "O"
+								then ifCounter := ifCounter + 1
+							if word == "OIC"
+							then
+							{
+
+								if ifCounter = 0
+									then 
+									{
+										write("block: " || searchSpace[0:&pos])
+										break
+									}
+								if ifCounter > 0
+									then ifCounter := ifCounter - 1
+							}
+						}
+					}
+					#reset pos
+					write("Searching in: " || searchSpace)
+				}
+				else parseLine(line)
+		}
+	}
 end
 
+#Parses and executes an individual line
 procedure parseLine(line)
 	line ?
 	{
 		if ="I HAS A"
 			then addVar(line) & return	
 	    if ="O RLY"
-			then ifStmt(line) & return	
+			then ifStmt(line) & return
+		if ="VISIBLE"
+			then visibleStmt(line) & return
+	}
+end
+
+procedure visibleStmt(line)
+	line ?
+	{
+		move(match("VISIBLE"))
+			
+		expression := fullTrim(tab(0), ' \t\n')
+		if match('\"', expression)
+			then writes(fullTrim(expression, '\"'))
+			else writes(parseExpression(expression || "\n"))
 	}
 end
 
@@ -60,7 +117,7 @@ procedure ifStmt(line)
 								}
 								else
 								{
-									winBlock := line[startBlockLocation:(&pos-3)]
+									winBlock := line[startBlockLocation:&pos-3]
 								}
 							break
 						}
@@ -114,7 +171,6 @@ procedure execExpression()
 		then write("empty") & return
 
 	node := pop(expressionQueue)
-	write("Popped: " || node)
 	if node[1] ? any(&digits)
 		then return node
 	
@@ -162,7 +218,7 @@ procedure execExpression()
 		}
 	# Check if variable is defined / exists
 	value := vars[node]
-	if /value
+	if value ~== "NOOB"
 		then return value
 		else write("Error: " || node || " is undefined")
 end
