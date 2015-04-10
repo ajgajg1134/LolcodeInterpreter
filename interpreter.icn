@@ -21,20 +21,15 @@ procedure executeBlock(block)
 			if loc < &pos
 				then next
 			line := fullTrim(tab(loc), ' \t\n')
-			#write("=>" || line)
 			if match("O RLY", line)
 				then
 				{
 					searchSpace := line || block[&pos:*block]
 					startBlockLocation := &pos - *line
 					ifCounter := 0
-					#searchSpace ? 
-					#{
-					#move(5) #move past O RLY
 					every wordLoc := upto(' \t\n') do
 					{
 						word := fullTrim(tab(wordLoc), ' \t\n')
-						#write("word: " || word)
 						if word == "O"
 							then ifCounter := ifCounter + 1
 						if word == "OIC"
@@ -45,7 +40,6 @@ procedure executeBlock(block)
 								{
 									ifStmt(block[startBlockLocation:&pos]||"\n")
 									moveUpto := &pos
-									#write("pos: " || moveUpto)
 									break
 								}
 							if ifCounter > 0
@@ -53,15 +47,9 @@ procedure executeBlock(block)
 						}
 					}
 					&pos := moveUpto
-					#}
-					#tab(moveUpto - *line)	
-					#write("line: " || line)
-					#write("leftover:" || block[&pos:*block])
-					#write("moved past: " || tab(moveUpto - *line))
 				}
 				else 
 				{
-					#write("parsing: " || line)
 					parseLine(line)
 				}
 		}
@@ -96,7 +84,6 @@ procedure visibleStmt(line)
 end
 
 procedure ifStmt(line)
-	#write("->"||line)
 	line ?
 	{
 		move(match("O RLY"))
@@ -113,7 +100,6 @@ procedure ifStmt(line)
 		every wordLoc := upto(' \t\n') do
 		{
 			word := fullTrim(tab(wordLoc), ' \t\n')
-			#write("word: " || word)
 			if word == "O"
 				then ifCounter := ifCounter + 1
 			if word == "NO" & ifCounter = 0
@@ -151,13 +137,10 @@ procedure ifStmt(line)
 				write("ERROR O RLY? MISSING MATCHING OIC:\n" || line)
 				return
 			}
-		#write("win: " || winBlock)
-		#write("fail: " || elseBlock)	
 		
 		if result = 1
 			then
 			{
-				#write("~>" || winBlock)
 				executeBlock(winBlock)
 			}
 			else
@@ -166,7 +149,6 @@ procedure ifStmt(line)
 					then 
 					{
 						executeBlock(elseBlock)
-						#write("!>" || elseBlock)
 					}
 			}
 	}
